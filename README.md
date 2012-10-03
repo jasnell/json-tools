@@ -2,6 +2,10 @@
 
 A basic implementation of the JSON Patch, Pointer and Predicate specifications.
 
+```
+gem install json-tools
+````
+
 ``` ruby
 require 'jsontools'
 include JsonTools
