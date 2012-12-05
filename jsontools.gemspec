@@ -6,8 +6,8 @@
 ##############################################
 Gem::Specification.new do |s|
   s.name        = 'json-tools'
-  s.version     = '0.0.1'
-  s.date        = '2012-10-02'
+  s.version     = '0.0.2'
+  s.date        = '2012-12-05'
   s.summary     = "JSON Patch + Pointer + Predicates"
   s.description = "A JSON Patch + Pointer + Predicates Implementation"
   s.authors     = ["James M Snell"]

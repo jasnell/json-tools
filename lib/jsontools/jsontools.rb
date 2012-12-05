@@ -180,12 +180,15 @@ module JsonTools
       
       def add params, target
         ptr = Pointer.new params['path']
-        fail if ptr.exists? target
         obj = ptr[target]
         fail if not (Array === obj || Hash === obj)
-        obj.insert JsonTools.fix_key(obj,ptr.last),params['value']
+        if (Array === obj && ptr.last == '-') 
+          obj.insert -1,params['value']
+        else
+          obj.insert JsonTools.fix_key(obj,ptr.last),params['value']
+        end
       rescue
-        raise FailedOperationError
+         raise FailedOperationError
       end
         
       def remove params, target
@@ -206,9 +209,9 @@ module JsonTools
       end
     
       def move_or_copy params, target, move=false 
-        from = Pointer.new params['path']
-        to = Pointer.new params['to']
-        fail if !from.exists?(target) || to.exists?(target)
+        from = Pointer.new params['from']
+        to = Pointer.new params['path']
+        fail if !from.exists?(target) #|| to.exists?(target)
         obj = from[target]
         val = obj[JsonTools.fix_key(obj,from.last)]
         remove(({'path'=>params['path']}), target) if move # we only remove it if we're doing a move operation
