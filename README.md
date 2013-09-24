@@ -2,7 +2,7 @@
 
 A basic implementation of the JSON Patch, Pointer and Predicate specifications.
 
-```
+``` bash
 gem install json-tools
 ````
 

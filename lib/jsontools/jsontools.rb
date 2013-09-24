@@ -161,8 +161,11 @@ module JsonTools
     # be reversable in the case of failure.
     def apply_to! target
       @ops.each_with_object(target) do |operation, target|
-        op = operation['op'].to_sym if operation.key?('op')
-        PATCH_OPERATIONS[op][operation, target] rescue raise 'Invalid Operation'
+        raise 'Invalid Operation' unless operation.key?('op')
+        op = operation['op']
+        ic = op.slice!(-1) if op[-1] == '-'
+        operation['ignore_case'] = ic != nil
+        PATCH_OPERATIONS[op.to_sym][operation, target] rescue raise 'Invalid Operation'
       end
     end
     
@@ -239,7 +242,7 @@ module JsonTools
         raise FailedOperationError
       end
 
-    end # END EIGENCLASS DEFINITION
+    end
     
     # Specify the Patch Operations
     [:add,:remove,:replace,:move,:copy,:test].each { |x| PATCH_OPERATIONS[x] = lambda(&method(x)) }
@@ -349,8 +352,10 @@ module JsonTools
     def self.and params, target
       preds = params['apply']
       return false unless preds.all? {|pred| 
-        op = pred['op'].to_sym
-        PREDICATES[op][pred,target] rescue return false
+        op = pred['op']
+        ic = op.slice! -1 if op[-1] == '-'
+        pred['ignore_case'] = ic != nil
+        PREDICATES[op.to_sym][pred,target] rescue return false
       }
       true
     end
@@ -358,8 +363,10 @@ module JsonTools
     def self.not params, target
       preds = params['apply']
       return false unless preds.none? {|pred| 
-        op = pred['op'].to_sym
-        PREDICATES[op][pred,target] rescue return false
+        op = pred['op']
+        ic = op.slice! -1 if op[-1] == '-'
+        pred['ignore_case'] = ic != nil
+        PREDICATES[op.to_sym][pred,target] rescue return false
       }
       true
     end
@@ -367,16 +374,27 @@ module JsonTools
     def self.or params, target
       preds = params['apply']
       return false unless preds.any? {|pred| 
-        op = pred['op'].to_sym
-        PREDICATES[op][pred,target] rescue return false
+        op = pred['op']
+        ic = op.slice! -1 if op[-1] == '-'
+        pred['ignore_case'] = ic != nil
+        PREDICATES[op.to_sym][pred,target] rescue return false
       }
       true
     end
     
     PREDICATES = {}
-    [:contains, :defined, :ends, :less,
-       :matches, :more, :starts, :type,
-       :undefined, :and, :not, :or].each {|x|
+    [:contains, 
+     :defined, 
+     :ends, 
+     :less, 
+     :matches, 
+     :more, 
+     :starts, 
+     :type, 
+     :undefined, 
+     :and, 
+     :not, 
+     :or].each {|x|
         PREDICATES[x] = lambda(&method(x))
       }
       
